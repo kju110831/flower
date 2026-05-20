@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -27,13 +28,390 @@
     ::-webkit-scrollbar { display: none; }
   </style>
 </head>
-<body class="text-gray-800 h-screen w-screen overflow-hidden flex justify-center items-center">
+<body class="text-gray-800 h-screen w-screen overflow-hidden flex justify-center items-center p-0 m-0">
 
-  <div id="app-container" class="w-full max-w-4xl h-full max-h-screen bg-white sm:rounded-3xl shadow-2xl relative overflow-hidden flex flex-col">
+  <!-- 갤럭시탭 S10 라이트 (2112x1320, 16:10) 해상도에 맞춰 꽉 차는 풀스크린 컨테이너 -->
+  <div id="app-container" class="w-full h-full bg-white relative overflow-hidden flex flex-col p-0 m-0">
     
     <!-- 1. 시작 메뉴 화면 -->
-    <div id="view-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-[#FFF0F5] z-50">
-      <h1 class="text-5xl md:text-6xl text-pink-500 mb-6 text-center drop-shadow-md">🌸 유치원 꽃가게 🌸</h1>
+    <div id="view-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-[#FFF0F5] z-50 p-8">
+      <h1 class="text-6xl md:text-8xl text-pink-500 mb-8 text-center drop-shadow-md">🌸 유치원 꽃가게 🌸</h1>
+      <p class="text-2xl md:text-3xl text-pink-400 mb-16">태블릿 역할을 골라주세요!</p>
+      <div class="flex flex-col sm:flex-row gap-12 w-full max-w-5xl justify-center px-6">
+        <button onclick="startApp('customer')" class="btn-press flex-1 bg-pink-400 hover:bg-pink-500 text-white text-4xl md:text-5xl py-20 px-12 rounded-[3rem] shadow-2xl border-b-8 border-pink-600 flex flex-col items-center justify-center gap-6 transition-all">
+          <span class="text-8xl md:text-9xl">👧👦</span>
+          <span class="font-bold tracking-wide">손님용 키오스크</span>
+        </button>
+        <button onclick="startApp('owner')" class="btn-press flex-1 bg-blue-400 hover:bg-blue-500 text-white text-4xl md:text-5xl py-20 px-12 rounded-[3rem] shadow-2xl border-b-8 border-blue-600 flex flex-col items-center justify-center gap-6 transition-all">
+          <span class="text-8xl md:text-9xl">🏪</span>
+          <span class="font-bold tracking-wide">사장님용 화면</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. 손님용 화면 (키오스크 - 갤럭시탭 16:10 완벽 대응 레이아웃) -->
+    <div id="view-customer" class="hidden absolute inset-0 flex flex-col bg-pink-50">
+      <!-- 상단 헤더 (높이 확보) -->
+      <div class="bg-pink-400 text-white text-4xl md:text-5xl font-bold py-6 px-8 text-center shadow-md flex justify-between items-center shrink-0">
+        <button onclick="goHome()" class="text-2xl md:text-3xl bg-pink-500 py-3 px-6 rounded-2xl btn-press">🏠 처음으로</button>
+        <span class="tracking-wide">🌸 예쁜 꽃을 골라주세요 🌸</span>
+        <div class="w-32"></div>
+      </div>
+      
+      <!-- 꽃 리스트 (2x2 풀 그리드로 화면 상하좌우를 여백 없이 꽉 채움) -->
+      <div id="flower-grid" class="flex-1 p-6 grid grid-cols-2 grid-rows-2 gap-6 h-full min-h-0">
+        <!-- JS 렌더링 영역 (각 카드가 정확히 상하 높이 50%씩 차지하도록 유동 조절) -->
+      </div>
+
+      <!-- 하단 결제/주문 바 (큼직하게 확대) -->
+      <div class="bg-white py-6 px-12 shadow-[0_-6px_20px_rgba(0,0,0,0.15)] shrink-0 flex justify-between items-center rounded-t-[2.5rem] border-t-8 border-pink-200">
+        <div class="text-4xl md:text-5xl text-pink-600 font-bold">
+          내가 고른 꽃: <span id="total-count" class="text-5xl md:text-6xl text-pink-500 font-extrabold">0</span> 송이
+        </div>
+        <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-4xl md:text-5xl font-bold py-6 px-16 rounded-3xl shadow-xl border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all flex items-center gap-4">
+          <span>주문하기</span> <span>🛒</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. 사장님용 화면 -->
+    <div id="view-owner" class="hidden absolute inset-0 flex flex-col bg-blue-50">
+      <div class="bg-blue-400 text-white text-4xl md:text-5xl font-bold py-6 px-8 text-center shadow-md flex justify-between items-center shrink-0">
+        <button onclick="goHome()" class="text-2xl md:text-3xl bg-blue-500 py-3 px-6 rounded-2xl btn-press">🏠 처음으로</button>
+        <span class="tracking-wide">🏪 꽃가게 사장님 화면 🏪</span>
+        <div class="text-3xl bg-blue-500 py-3 px-6 rounded-2xl">대기 주문: <span id="order-count-badge" class="font-bold">0</span></div>
+      </div>
+
+      <!-- 주문 내역 리스트 -->
+      <div id="order-list" class="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
+        <div id="empty-orders" class="h-full flex flex-col items-center justify-center text-gray-400 text-4xl gap-6">
+          <span class="text-9xl">💤</span>
+          <span class="font-bold text-gray-500">아직 들어온 주문이 없어요!</span>
+          <span class="text-2xl text-gray-400">손님들이 꽃을 고르고 있어요.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 화면 중앙 주문 완료 알림창 (가벼운 토스트 피드백) -->
+    <div id="toast-message" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-16 py-8 rounded-[2rem] text-4xl md:text-5xl shadow-2xl z-[100] font-bold pointer-events-none transition-all duration-300 flex flex-col items-center gap-4">
+      <span class="text-7xl">🎉</span>
+      <span>주문이 사장님께 날아갔어요!</span>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXqCCi3tWHmL6OKC4SIkqYsJA1-0Sal4w",
+      authDomain: "flower-d52f7.firebaseapp.com",
+      projectId: "flower-d52f7",
+      storageBucket: "flower-d52f7.firebasestorage.app",
+      messagingSenderId: "894573402179",
+      appId: "1:894573402179:web:645cb0aef8b4d977ffdcf6",
+      measurementId: "G-F4X9T42XMP"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const ORDERS_COLLECTION = "kindergarten_flower_orders";
+
+    const flowers = [
+      { id: 'sunflower', name: '해바라기', icon: '🌻', color: 'bg-yellow-100', border: 'border-yellow-400' },
+      { id: 'rose', name: '장미', icon: '🌹', color: 'bg-red-100', border: 'border-red-400' },
+      { id: 'tulip', name: '튤립', icon: '🌷', color: 'bg-pink-100', border: 'border-pink-400' },
+      { id: 'daisy', name: '데이지', icon: '🌼', color: 'bg-green-100', border: 'border-green-400' }
+    ];
+
+    let cart = { sunflower: 0, rose: 0, tulip: 0, daisy: 0 };
+    let currentRole = null;
+    let unsubscribeOrders = null;
+    let previousOrderCount = 0;
+
+    // --- 강력해진 웹 오디오 엔진 ---
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // 소리 활성화를 위한 이중 이벤트 캡처 (터치, 마우스 클릭 등 전방위 적용)
+    window.addEventListener('touchstart', initAudio, { passive: true });
+    window.addEventListener('click', initAudio, { passive: true });
+    window.addEventListener('pointerdown', initAudio, { passive: true });
+
+    function playSound(type) {
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      const now = audioCtx.currentTime;
+
+      if (type === 'success') {
+        // 도-미-솔-도 쾌활한 상승 화음
+        osc.type = 'sine';
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, index) => {
+          osc.frequency.setValueAtTime(freq, now + index * 0.08);
+        });
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.6, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      } else if (type === 'notification') {
+        // 띵동! 사장님 알림음
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880.00, now);
+        osc.frequency.setValueAtTime(698.46, now + 0.12);
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.7, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      } else if (type === 'pop') {
+        // 뽁! 쫀득한 버튼음
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(1000, now + 0.06);
+        gainNode.gain.setValueAtTime(0.6, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+    }
+
+    // --- 앱 부팅 및 전환 ---
+    window.startApp = async (role) => {
+      initAudio();
+      playSound('pop');
+      currentRole = role;
+      document.getElementById('view-menu').classList.add('hidden');
+      
+      try {
+        await signInAnonymously(auth);
+      } catch (error) {
+        console.warn("Firebase 로그인 연결:", error);
+      }
+
+      if (role === 'customer') {
+        document.getElementById('view-customer').classList.remove('hidden');
+        renderCustomerView();
+      } else if (role === 'owner') {
+        document.getElementById('view-owner').classList.remove('hidden');
+        startListeningToOrders();
+      }
+    };
+
+    window.goHome = () => {
+      playSound('pop');
+      document.getElementById('view-customer').classList.add('hidden');
+      document.getElementById('view-owner').classList.add('hidden');
+      document.getElementById('view-menu').classList.remove('hidden');
+      if (unsubscribeOrders) {
+        unsubscribeOrders();
+        unsubscribeOrders = null;
+      }
+      resetCart();
+      currentRole = null;
+    };
+
+    // --- 손님용 (키오스크) 화면 설계 ---
+    function renderCustomerView() {
+      const grid = document.getElementById('flower-grid');
+      grid.innerHTML = '';
+      flowers.forEach(flower => {
+        const card = document.createElement('div');
+        // 갤럭시탭 세로 비율을 고려해 카드가 전체 높이를 유동적으로 채우도록 flex 및 높이 100% 분배 지정
+        card.className = `${flower.color} border-4 ${flower.border} rounded-[2.5rem] p-6 flex flex-col justify-between items-center shadow-lg h-full`;
+        card.innerHTML = `
+          <div class="text-[7.5rem] leading-none mb-2 md:mt-4 select-none">${flower.icon}</div>
+          <div class="text-3xl md:text-4xl font-black mb-4">${flower.name}</div>
+          <div class="flex items-center gap-6 bg-white rounded-3xl p-3 shadow-inner w-full max-w-md justify-between">
+            <button onclick="updateCart('${flower.id}', -1)" class="btn-press bg-gray-200 text-gray-700 w-16 h-16 rounded-2xl text-4xl font-extrabold flex items-center justify-center">-</button>
+            <span id="count-${flower.id}" class="text-4xl md:text-5xl font-extrabold w-16 text-center text-gray-800">${cart[flower.id]}</span>
+            <button onclick="updateCart('${flower.id}', 1)" class="btn-press bg-pink-400 text-white w-16 h-16 rounded-2xl text-4xl font-extrabold flex items-center justify-center">+</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      updateOrderButton();
+    }
+
+    window.updateCart = (flowerId, change) => {
+      playSound('pop');
+      const newCount = cart[flowerId] + change;
+      if (newCount >= 0 && newCount <= 20) {
+        cart[flowerId] = newCount;
+        document.getElementById(`count-${flowerId}`).innerText = cart[flowerId];
+        updateOrderButton();
+      }
+    };
+
+    function updateOrderButton() {
+      const totalCount = Object.values(cart).reduce((a, b) => a + b, 0);
+      document.getElementById('total-count').innerText = totalCount;
+      
+      const btn = document.getElementById('btn-order');
+      if (totalCount > 0) {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400', 'border-gray-600');
+        btn.classList.add('bg-pink-500', 'border-pink-700');
+        btn.disabled = false;
+      } else {
+        btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400', 'border-gray-600');
+        btn.classList.remove('bg-pink-500', 'border-pink-700');
+        btn.disabled = true;
+      }
+    }
+
+    // [완벽 해결] 카트 수량 정보와 화면의 수치 UI를 즉각 '0'으로 완벽하게 되돌려 놓는 강제 리셋 함수
+    function resetCart() {
+      for (let key in cart) {
+        cart[key] = 0;
+      }
+      // UI를 지체없이 완벽 재생성하여 수량이 남아있지 않게 만듭니다.
+      renderCustomerView();
+    }
+
+    window.submitOrder = async () => {
+      const totalCount = Object.values(cart).reduce((a, b) => a + b, 0);
+      if (totalCount === 0) return;
+
+      // 전송을 보낼 소중한 데이터 복제본 먼저 확보
+      const orderItems = [];
+      flowers.forEach(f => {
+        if (cart[f.id] > 0) {
+          orderItems.push({ name: f.name, icon: f.icon, count: cart[f.id] });
+        }
+      });
+
+      // [버그 수정의 핵심] 통신 딜레이를 기다리지 않고 터치 즉시 UI 숫자를 모두 '0'개로 강제 리셋!
+      resetCart();
+      updateOrderButton();
+
+      // 소리와 안내 배너도 즉시 실행
+      playSound('success');
+      const toast = document.getElementById('toast-message');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 1800);
+
+      // 데이터베이스 저장은 백그라운드에서 실행
+      try {
+        await addDoc(collection(db, ORDERS_COLLECTION), {
+          items: orderItems,
+          total: totalCount,
+          createdAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error("주문 전송 오류:", error);
+      }
+    };
+
+    // --- 사장님용 실시간 데이터 연동 ---
+    function startListeningToOrders() {
+      const q = collection(db, ORDERS_COLLECTION);
+      
+      unsubscribeOrders = onSnapshot(q, (snapshot) => {
+        const orders = [];
+        snapshot.forEach((doc) => {
+          orders.push({ id: doc.id, ...doc.data() });
+        });
+
+        orders.sort((a, b) => {
+          const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
+          const timeB = b.createdAt ? b.createdAt.toMillis() : Date.now();
+          return timeA - timeB;
+        });
+
+        renderOwnerView(orders);
+
+        if (orders.length > previousOrderCount) {
+          if (previousOrderCount !== 0) {
+            playSound('notification');
+            document.body.classList.add('flash-bg');
+            setTimeout(() => document.body.classList.remove('flash-bg'), 2400);
+          }
+        }
+        previousOrderCount = orders.length;
+
+      }, (error) => {
+        console.error("실시간 통신 에러:", error);
+      });
+    }
+
+    function renderOwnerView(orders) {
+      const listContainer = document.getElementById('order-list');
+      const emptyState = document.getElementById('empty-orders');
+      document.getElementById('order-count-badge').innerText = orders.length;
+
+      Array.from(listContainer.children).forEach(child => {
+        if (child.id !== 'empty-orders') listContainer.removeChild(child);
+      });
+
+      if (orders.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        
+        orders.forEach((order, index) => {
+          const card = document.createElement('div');
+          card.className = "bg-white p-6 rounded-[2rem] shadow-lg border-4 border-blue-200 flex flex-col sm:flex-row justify-between items-center gap-6 pop-in";
+          card.style.animationDelay = `${index * 0.1}s`;
+          
+          let itemsHtml = order.items.map(item => 
+            `<div class="flex items-center gap-3 bg-pink-50 px-6 py-4 rounded-2xl text-3xl border border-pink-100">
+               <span class="text-4xl">${item.icon}</span>
+               <span class="font-bold text-gray-700">${item.name} <span class="text-pink-600 font-extrabold text-4xl">${item.count}</span>송이</span>
+             </div>`
+          ).join('');
+
+          card.innerHTML = `
+            <div class="flex-1 w-full">
+              <div class="text-blue-500 font-bold mb-4 flex items-center gap-2">
+                <span class="bg-blue-100 px-4 py-2 rounded-xl text-2xl font-black">주문 번호 ${index + 1}</span>
+              </div>
+              <div class="flex flex-wrap gap-4">
+                ${itemsHtml}
+              </div>
+            </div>
+            <button onclick="completeOrder('${order.id}')" class="btn-press shrink-0 bg-blue-500 hover:bg-blue-600 text-white text-3xl md:text-4xl font-bold py-8 px-12 rounded-[2rem] shadow-xl border-b-8 border-blue-700 w-full sm:w-auto transition-all">
+              배달 완료 🚚
+            </button>
+          `;
+          listContainer.appendChild(card);
+        });
+      }
+    }
+
+    window.completeOrder = async (orderId) => {
+      playSound('pop');
+      try {
+        await deleteDoc(doc(db, ORDERS_COLLECTION, orderId));
+      } catch (error) {
+        console.error("배달 처리 에러:", error);
+      }
+    };
+
+  </script>
+</body>
+</html>
+
+```
       <p class="text-xl text-pink-400 mb-12">역할을 골라주세요!</p>
       <div class="flex flex-col md:flex-row gap-6">
         <button onclick="startApp('customer')" class="btn-press bg-pink-400 hover:bg-pink-500 text-white text-4xl py-12 px-16 rounded-3xl shadow-lg border-b-8 border-pink-600 flex flex-col items-center gap-4 transition-colors">
