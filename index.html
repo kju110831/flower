@@ -30,13 +30,13 @@
 </head>
 <body class="text-gray-800 h-screen w-screen overflow-hidden bg-[#FFF5F5] p-0 m-0 flex justify-center items-center">
 
-  <!-- 전체 화면 컨테이너 (갤럭시탭 S10 라이트 화면 규격에 맞춰 100% 빈틈없이 채움) -->
+  <!-- 전체 화면 컨테이너 (갤럭시탭 S10 라이트 16:10에 맞게 꽉 채움) -->
   <div id="app-container" class="w-full h-full relative overflow-hidden flex flex-col p-0 m-0">
     
-    <!-- 1. 시작 메뉴 화면 (단독 활성화 유지) -->
+    <!-- 1. 시작 메뉴 화면 -->
     <div id="view-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-[#FFF0F5] z-50 p-6">
-      <h1 class="text-5xl sm:text-7xl md:text-8xl text-pink-500 mb-6 text-center drop-shadow-md">🌸 유치원 꽃가게 🌸</h1>
-      <p class="text-xl sm:text-2xl md:text-3xl text-pink-400 mb-10 sm:mb-16">태블릿 역할을 골라주세요!</p>
+      <h1 class="text-5xl sm:text-7xl md:text-8xl text-pink-500 mb-6 text-center drop-shadow-md font-black">🌸 유치원 꽃가게 🌸</h1>
+      <p class="text-xl sm:text-2xl md:text-3xl text-pink-400 mb-10 sm:mb-16 font-bold">역할을 골라주세요!</p>
       <div class="flex flex-col sm:flex-row gap-8 sm:gap-12 w-full max-w-4xl justify-center px-6">
         <button onclick="startApp('customer')" class="btn-press flex-1 bg-pink-400 hover:bg-pink-500 text-white text-3xl sm:text-4xl md:text-5xl py-12 sm:py-20 px-8 rounded-[2.5rem] shadow-2xl border-b-8 border-pink-600 flex flex-col items-center justify-center gap-4 sm:gap-6 transition-all">
           <span class="text-7xl sm:text-8xl md:text-9xl">👧👦</span>
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <!-- 2. 손님용 화면 (키오스크 - 가로/세로 자동회전 완벽 대응) -->
+    <!-- 2. 손님용 화면 -->
     <div id="view-customer" class="hidden absolute inset-0 flex flex-col bg-pink-50 z-40">
       <!-- 상단 헤더 -->
       <div class="bg-pink-400 text-white text-3xl sm:text-4xl md:text-5xl font-bold py-4 sm:py-6 px-6 sm:px-8 text-center shadow-md flex justify-between items-center shrink-0">
@@ -58,15 +58,14 @@
         <div class="w-24 sm:w-32"></div>
       </div>
       
-      <!-- 꽃 리스트 (가로/세로에 맞춤형 반응 그리드 적용) -->
-      <!-- 가로일 때는 grid-cols-2 grid-rows-2, 세로일 때는 landscape 미디어 쿼리가 꺼지며 grid-cols-1 grid-rows-4로 스크롤 없이 가득 차게 구성 -->
+      <!-- 꽃 리스트 (가로/세로 자동 대처) -->
       <div id="flower-grid" class="flex-1 p-4 sm:p-6 grid grid-cols-1 grid-rows-4 landscape:grid-cols-2 landscape:grid-rows-2 gap-4 sm:gap-6 h-full min-h-0">
         <!-- JS 렌더링 영역 -->
       </div>
 
-      <!-- 하단 주문하기 고정 영역 -->
-      <div class="bg-white py-4 sm:py-6 px-6 sm:px-12 shadow-[0_-6px_20px_rgba(0,0,0,0.15)] shrink-0 flex justify-between items-center rounded-t-[2rem] sm:rounded-t-[2.5rem] border-t-4 sm:border-t-8 border-pink-200">
-        <div class="text-2xl sm:text-4xl md:text-5xl text-pink-600 font-bold">
+      <!-- 하단 주문바 -->
+      <div class="bg-white py-4 sm:py-6 px-6 sm:px-12 shadow-[0_-6px_20px_rgba(0,0,0,0.15)] shrink-0 flex justify-between items-center rounded-t-[2rem] sm:rounded-t-[2.5rem] border-t-4 sm:border-t-8 border-pink-200 font-bold">
+        <div class="text-2xl sm:text-4xl md:text-5xl text-pink-600">
           내가 고른 꽃: <span id="total-count" class="text-3xl sm:text-5xl md:text-6xl text-pink-500 font-extrabold">0</span> 송이
         </div>
         <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-2xl sm:text-4xl md:text-5xl font-bold py-4 sm:py-6 px-8 sm:px-16 rounded-2xl sm:rounded-3xl shadow-xl border-b-4 sm:border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all flex items-center gap-3 sm:gap-4">
@@ -75,26 +74,26 @@
       </div>
     </div>
 
-    <!-- 3. 사장님용 화면 (독립 레이아웃 격리) -->
+    <!-- 3. 사장님용 화면 -->
     <div id="view-owner" class="hidden absolute inset-0 flex flex-col bg-blue-50 z-30">
       <!-- 상단 헤더 -->
       <div class="bg-blue-400 text-white text-3xl sm:text-4xl md:text-5xl font-bold py-4 sm:py-6 px-6 sm:px-8 text-center shadow-md flex justify-between items-center shrink-0">
         <button onclick="goHome()" class="text-xl sm:text-2xl md:text-3xl bg-blue-500 py-2 sm:py-3 px-4 sm:px-6 rounded-2xl btn-press">🏠 처음으로</button>
-        <span class="tracking-wide">🏪 꽃가게 사장님 화면 🏪</span>
-        <div class="text-2xl sm:text-3xl bg-blue-500 py-2 sm:py-3 px-4 sm:px-6 rounded-2xl">대기 주문: <span id="order-count-badge" class="font-bold">0</span></div>
+        <span class="tracking-wide font-bold">🏪 꽃가게 사장님 화면 🏪</span>
+        <div class="text-2xl sm:text-3xl bg-blue-500 py-2 sm:py-3 px-4 sm:px-6 rounded-2xl font-bold">대기 주문: <span id="order-count-badge">0</span></div>
       </div>
 
       <!-- 주문 내역 리스트 -->
       <div id="order-list" class="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col gap-4 sm:gap-6">
-        <div id="empty-orders" class="h-full flex flex-col items-center justify-center text-gray-400 text-3xl sm:text-4xl gap-4 sm:gap-6 my-auto">
+        <div id="empty-orders" class="h-full flex flex-col items-center justify-center text-gray-400 text-3xl sm:text-4xl gap-4 sm:gap-6 my-auto font-bold">
           <span class="text-8xl sm:text-9xl">💤</span>
-          <span class="font-bold text-gray-500">아직 들어온 주문이 없어요!</span>
+          <span class="text-gray-500">아직 들어온 주문이 없어요!</span>
           <span class="text-xl sm:text-2xl text-gray-400">손님들이 꽃을 고르고 있어요.</span>
         </div>
       </div>
     </div>
 
-    <!-- 화면 중앙 주문 완료 안내 (클릭 관여 없는 귀여운 토스트) -->
+    <!-- 주문 성공 즉시 알림 토스트 -->
     <div id="toast-message" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-10 sm:px-16 py-6 sm:py-8 rounded-[2rem] text-3xl sm:text-4xl md:text-5xl shadow-2xl z-[100] font-bold pointer-events-none transition-all duration-300 flex flex-col items-center gap-3 sm:gap-4">
       <span class="text-6xl sm:text-7xl">🎉</span>
       <span class="text-center">주문이 사장님께 날아갔어요!</span>
@@ -103,10 +102,11 @@
   </div>
 
   <script type="module">
+    // Firebase 11.6.1 Web SDK 임포트 (앱 및 실시간 데이터베이스)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
+    // 선생님의 Firebase 설정 정보
     const firebaseConfig = {
       apiKey: "AIzaSyCXqCCi3tWHmL6OKC4SIkqYsJA1-0Sal4w",
       authDomain: "flower-d52f7.firebaseapp.com",
@@ -114,13 +114,15 @@
       storageBucket: "flower-d52f7.firebasestorage.app",
       messagingSenderId: "894573402179",
       appId: "1:894573402179:web:645cb0aef8b4d977ffdcf6",
-      measurementId: "G-F4X9T42XMP"
+      measurementId: "G-F4X9T42XMP",
+      // 실시간 데이터베이스 주소 자동 추가 (프로젝트 ID 기준 기본 주소 세팅)
+      databaseURL: "https://flower-d52f7-default-rtdb.firebaseio.com" 
     };
 
+    // Firebase 초기화 및 리얼타임 데이터베이스 객체 획득
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const ORDERS_COLLECTION = "kindergarten_flower_orders";
+    const db = getDatabase(app);
+    const DB_ORDERS_PATH = "kindergarten_flower_orders"; // 저장할 경로명
 
     const flowers = [
       { id: 'sunflower', name: '해바라기', icon: '🌻', color: 'bg-yellow-100', border: 'border-yellow-400' },
@@ -131,8 +133,8 @@
 
     let cart = { sunflower: 0, rose: 0, tulip: 0, daisy: 0 };
     let currentRole = null;
-    let unsubscribeOrders = null;
     let previousOrderCount = 0;
+    let rtdbListener = null;
 
     // --- 웹 오디오 설정 ---
     let audioCtx = null;
@@ -194,25 +196,19 @@
     }
 
     // --- 앱 상태 제어 ---
-    window.startApp = async (role) => {
+    window.startApp = (role) => {
       initAudio();
       playSound('pop');
       currentRole = role;
       document.getElementById('view-menu').classList.add('hidden');
-      
-      try {
-        await signInAnonymously(auth);
-      } catch (error) {
-        console.warn("Firebase 로그인 우회:", error);
-      }
 
       if (role === 'customer') {
         document.getElementById('view-customer').classList.remove('hidden');
-        document.getElementById('view-owner').classList.add('hidden'); // 격리 처리 추가
+        document.getElementById('view-owner').classList.add('hidden');
         renderCustomerView();
       } else if (role === 'owner') {
         document.getElementById('view-owner').classList.remove('hidden');
-        document.getElementById('view-customer').classList.add('hidden'); // 격리 처리 추가
+        document.getElementById('view-customer').classList.add('hidden');
         startListeningToOrders();
       }
     };
@@ -222,29 +218,28 @@
       document.getElementById('view-customer').classList.add('hidden');
       document.getElementById('view-owner').classList.add('hidden');
       document.getElementById('view-menu').classList.remove('hidden');
-      if (unsubscribeOrders) {
-        unsubscribeOrders();
-        unsubscribeOrders = null;
+      if (rtdbListener) {
+        // 사장님 수신 리스너 명시적 해제
+        rtdbListener();
+        rtdbListener = null;
       }
       resetCart();
       currentRole = null;
     };
 
-    // --- 손님용 (키오스크) UI 조립 ---
+    // --- 손님용 (키오스크) 화면 설계 ---
     function renderCustomerView() {
       const grid = document.getElementById('flower-grid');
       grid.innerHTML = '';
       flowers.forEach(flower => {
         const card = document.createElement('div');
-        // 가로/세로 회전에 최적화된 패딩 및 높이 유동 조정 클래스 적용
         card.className = `${flower.color} border-4 ${flower.border} rounded-[2rem] p-3 sm:p-5 flex flex-row landscape:flex-col justify-between items-center shadow-lg h-full w-full min-h-0`;
         card.innerHTML = `
-          <!-- 이미지 아이콘이 가로/세로 모드에서도 적절한 크기를 갖도록 조정 -->
           <div class="text-6xl sm:text-7xl md:text-[6.5rem] leading-none select-none flex-shrink-0">${flower.icon}</div>
           <div class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-800">${flower.name}</div>
           <div class="flex items-center gap-3 sm:gap-6 bg-white rounded-2xl p-2 sm:p-3 shadow-inner w-auto sm:w-full max-w-xs justify-between flex-shrink-0">
             <button onclick="updateCart('${flower.id}', -1)" class="btn-press bg-gray-200 text-gray-700 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center">-</button>
-            <span id="count-${flower.id}" class="text-2xl sm:text-4xl md:text-5xl font-extrabold w-12 sm:w-16 text-center text-gray-800">${cart[flower.id]}</span>
+            <span id="count-${flower.id}" class="text-2xl sm:text-4xl md:text-5xl font-extrabold w-12 sm:w-16 text-center text-gray-800">0</span>
             <button onclick="updateCart('${flower.id}', 1)" class="btn-press bg-pink-400 text-white w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center">+</button>
           </div>
         `;
@@ -253,7 +248,7 @@
       updateOrderButton();
     }
 
-    // 회전 발생 시 가로/세로 레이아웃을 다시 그리기 위해 렌더링 동기화
+    // 기기 회전 시 즉각 화면을 재구조화하여 렌더링
     window.addEventListener('resize', () => {
       if (currentRole === 'customer') {
         renderCustomerView();
@@ -304,11 +299,11 @@
         }
       });
 
-      // 누름과 동시에 지체없이 바로 0으로 숫자 동기화 리셋
+      // UI 0개로 즉각 강제 리셋 (지체 없이 리셋되어 다음 주문이 바로 가능합니다)
       resetCart();
       updateOrderButton();
 
-      // 알림음 및 귀여운 안내 토스트 팝업 실행
+      // 소리와 초록색 이정표 즉시 노출
       playSound('success');
       const toast = document.getElementById('toast-message');
       toast.classList.remove('hidden');
@@ -316,35 +311,45 @@
         toast.classList.add('hidden');
       }, 1800);
 
+      // Realtime Database에 주문 전송 (push 기능 사용)
       try {
-        await addDoc(collection(db, ORDERS_COLLECTION), {
+        const dbRef = ref(db, DB_ORDERS_PATH);
+        await push(dbRef, {
           items: orderItems,
           total: totalCount,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp() // 리얼타임 디비 호환 타임스탬프
         });
       } catch (error) {
         console.error("주문 전송 오류:", error);
       }
     };
 
-    // --- 사장님용 실시간 감시 모드 ---
+    // --- 사장님용 실시간 Realtime Database 수신 모드 ---
     function startListeningToOrders() {
-      const q = collection(db, ORDERS_COLLECTION);
+      const dbRef = ref(db, DB_ORDERS_PATH);
       
-      unsubscribeOrders = onSnapshot(q, (snapshot) => {
+      // onValue는 리얼타임 데이터베이스에서 실시간으로 데이터를 감시하는 함수입니다.
+      rtdbListener = onValue(dbRef, (snapshot) => {
         const orders = [];
-        snapshot.forEach((doc) => {
-          orders.push({ id: doc.id, ...doc.data() });
-        });
-
-        orders.sort((a, b) => {
-          const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
-          const timeB = b.createdAt ? b.createdAt.toMillis() : Date.now();
-          return timeA - timeB;
-        });
+        const data = snapshot.val();
+        
+        if (data) {
+          // 객체 형태의 데이터를 배열 형태로 포맷팅
+          Object.keys(data).forEach((key) => {
+            orders.push({ id: key, ...data[key] });
+          });
+          
+          // 시간순(오래된 순) 정렬
+          orders.sort((a, b) => {
+            const timeA = a.createdAt ? a.createdAt : Date.now();
+            const timeB = b.createdAt ? b.createdAt : Date.now();
+            return timeA - timeB;
+          });
+        }
 
         renderOwnerView(orders);
 
+        // 새 주문 유입 감지 시 효과음 및 깜빡임 효과
         if (orders.length > previousOrderCount) {
           if (previousOrderCount !== 0) {
             playSound('notification');
@@ -353,7 +358,6 @@
           }
         }
         previousOrderCount = orders.length;
-
       }, (error) => {
         console.error("실시간 수신 오류:", error);
       });
@@ -390,7 +394,7 @@
               <div class="text-blue-500 font-bold mb-3 sm:mb-4 flex items-center gap-2">
                 <span class="bg-blue-100 px-4 py-2 rounded-xl text-xl sm:text-2xl font-black">주문 번호 ${index + 1}</span>
               </div>
-              <div class="flex flex-wrap gap-3 sm:gap-4">
+              <div class="flex flex-wrap gap-3 sm:gap-4 font-bold">
                 ${itemsHtml}
               </div>
             </div>
@@ -403,10 +407,12 @@
       }
     }
 
+    // 사장님이 완료를 누르면 Realtime Database의 해당 노드를 삭제합니다.
     window.completeOrder = async (orderId) => {
       playSound('pop');
       try {
-        await deleteDoc(doc(db, ORDERS_COLLECTION, orderId));
+        const orderRef = ref(db, `${DB_ORDERS_PATH}/${orderId}`);
+        await remove(orderRef);
       } catch (error) {
         console.error("배달 처리 오류:", error);
       }
