@@ -1,0 +1,418 @@
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🌸 유치원 꽃가게 놀이 🌸</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Jua', sans-serif;
+      background-color: #FFF5F5; /* 연한 핑크빛 배경 */
+      touch-action: manipulation; /* 더블 탭 확대 방지 */
+    }
+    /* 아이들이 누를 때 쫀득한 느낌을 주는 버튼 애니메이션 */
+    .btn-press:active {
+      transform: scale(0.95);
+    }
+    /* 팝업 애니메이션 */
+    .pop-in {
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    /* 새 주문 알림 반짝임 효과 */
+    .flash-bg {
+      animation: flash 1s ease-in-out 3;
+    }
+    @keyframes flash {
+      0%, 100% { background-color: #FFF5F5; }
+      50% { background-color: #FEF08A; } /* 노란색으로 반짝임 */
+    }
+    
+    /* 스크롤바 숨기기 (깔끔한 UI) */
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="text-gray-800 h-screen w-screen overflow-hidden flex justify-center items-center">
+
+  <!-- 메인 앱 컨테이너 (태블릿 화면에 맞춤) -->
+  <div id="app-container" class="w-full max-w-4xl h-full max-h-screen bg-white sm:rounded-3xl shadow-2xl relative overflow-hidden flex flex-col">
+    
+    <!-- 1. 시작 메뉴 화면 -->
+    <div id="view-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-[#FFF0F5] z-50">
+      <h1 class="text-5xl md:text-6xl text-pink-500 mb-12 text-center drop-shadow-md">🌸 유치원 꽃가게 🌸</h1>
+      <div class="flex flex-col md:flex-row gap-6">
+        <button onclick="startApp('customer')" class="btn-press bg-pink-400 hover:bg-pink-500 text-white text-4xl py-12 px-16 rounded-3xl shadow-lg border-b-8 border-pink-600 flex flex-col items-center gap-4 transition-colors">
+          <span class="text-6xl">👧👦</span>
+          <span>손님하기</span>
+        </button>
+        <button onclick="startApp('owner')" class="btn-press bg-blue-400 hover:bg-blue-500 text-white text-4xl py-12 px-16 rounded-3xl shadow-lg border-b-8 border-blue-600 flex flex-col items-center gap-4 transition-colors">
+          <span class="text-6xl">🏪</span>
+          <span>사장님하기</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. 손님용 화면 (키오스크) -->
+    <div id="view-customer" class="hidden absolute inset-0 flex flex-col bg-pink-50">
+      <div class="bg-pink-400 text-white text-3xl p-4 text-center shadow-md flex justify-between items-center shrink-0">
+        <button onclick="goHome()" class="text-2xl bg-pink-500 p-2 rounded-xl btn-press">🏠 처음으로</button>
+        <span>🌸 예쁜 꽃을 골라주세요 🌸</span>
+        <div class="w-24"></div> <!-- 균형 맞추기용 -->
+      </div>
+      
+      <!-- 꽃 리스트 -->
+      <div id="flower-grid" class="flex-1 overflow-y-auto p-6 grid grid-cols-2 gap-6 content-start">
+        <!-- JS에서 렌더링 됨 -->
+      </div>
+
+      <!-- 하단 주문하기 버튼 영역 -->
+      <div class="bg-white p-6 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] shrink-0 flex justify-between items-center rounded-t-3xl border-t-4 border-pink-200">
+        <div class="text-3xl text-pink-600 font-bold">
+          총 <span id="total-count" class="text-4xl">0</span> 송이
+        </div>
+        <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-4xl py-4 px-10 rounded-2xl shadow-lg border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all">
+          주문하기 🛒
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. 사장님용 화면 -->
+    <div id="view-owner" class="hidden absolute inset-0 flex flex-col bg-blue-50">
+      <div class="bg-blue-400 text-white text-3xl p-4 text-center shadow-md flex justify-between items-center shrink-0">
+        <button onclick="goHome()" class="text-2xl bg-blue-500 p-2 rounded-xl btn-press">🏠 처음으로</button>
+        <span>🏪 꽃가게 사장님 화면 🏪</span>
+        <div class="text-2xl bg-blue-500 p-2 rounded-xl">주문 <span id="order-count-badge">0</span></div>
+      </div>
+
+      <!-- 주문 내역 리스트 -->
+      <div id="order-list" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+        <!-- 빈 화면 처리 (기본값) -->
+        <div id="empty-orders" class="h-full flex flex-col items-center justify-center text-gray-400 text-3xl gap-4">
+          <span class="text-6xl">💤</span>
+          <span>아직 들어온 주문이 없어요!</span>
+          <span class="text-xl">손님을 기다려보세요.</span>
+        </div>
+        <!-- 주문 카드가 여기에 추가됨 -->
+      </div>
+    </div>
+
+    <!-- 모달 창 (주문 완료, 안내 등) -->
+    <div id="modal-overlay" class="hidden absolute inset-0 bg-black bg-opacity-40 z-[100] flex justify-center items-center p-4">
+      <div id="modal-content" class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-6 pop-in max-w-sm w-full text-center">
+        <div id="modal-icon" class="text-7xl">🎉</div>
+        <div id="modal-message" class="text-3xl text-gray-700">주문이 완료되었습니다!</div>
+        <button onclick="closeModal()" class="btn-press bg-pink-400 text-white text-2xl py-3 px-8 rounded-xl border-b-4 border-pink-600 w-full mt-2">확인</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase 및 앱 로직 -->
+  <script type="module">
+    // Firebase SDK 설정 (선생님이 제공해주신 정보)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXqCCi3tWHmL6OKC4SIkqYsJA1-0Sal4w",
+      authDomain: "flower-d52f7.firebaseapp.com",
+      projectId: "flower-d52f7",
+      storageBucket: "flower-d52f7.firebasestorage.app",
+      messagingSenderId: "894573402179",
+      appId: "1:894573402179:web:645cb0aef8b4d977ffdcf6",
+      measurementId: "G-F4X9T42XMP"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const ORDERS_COLLECTION = "kindergarten_flower_orders"; // 데이터베이스 컬렉션 이름
+
+    // 꽃 종류 데이터
+    const flowers = [
+      { id: 'sunflower', name: '해바라기', icon: '🌻', color: 'bg-yellow-100', border: 'border-yellow-400' },
+      { id: 'rose', name: '장미', icon: '🌹', color: 'bg-red-100', border: 'border-red-400' },
+      { id: 'tulip', name: '튤립', icon: '🌷', color: 'bg-pink-100', border: 'border-pink-400' },
+      { id: 'daisy', name: '데이지', icon: '🌼', color: 'bg-green-100', border: 'border-green-400' }
+    ];
+
+    // 손님 장바구니 상태
+    let cart = { sunflower: 0, rose: 0, tulip: 0, daisy: 0 };
+    let currentRole = null;
+    let unsubscribeOrders = null;
+    let previousOrderCount = 0;
+
+    // --- 웹 오디오 (소리 효과) 설정 ---
+    // 외부 파일 없이 기본 제공되는 웹 오디오 API를 사용하여 맑은 소리를 냅니다.
+    let audioCtx;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      const now = audioCtx.currentTime;
+      if (type === 'success') {
+        // 주문 완료 소리 (띠리링~)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'notification') {
+        // 사장님 새 주문 알림 (띠동!)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(659.25, now); // E5
+        osc.frequency.setValueAtTime(523.25, now + 0.2); // C5
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.4, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      }
+    }
+
+    // --- 글로벌 함수들 (버튼 등에서 호출) ---
+    window.startApp = async (role) => {
+      initAudio();
+      currentRole = role;
+      document.getElementById('view-menu').classList.add('hidden');
+      
+      // 익명 로그인 시도 (Firebase 데이터베이스 보안 규칙 통과 목적)
+      try {
+        await signInAnonymously(auth);
+      } catch (error) {
+        console.warn("익명 로그인 실패 (보안 규칙에 따라 작동할 수도 있습니다):", error);
+      }
+
+      if (role === 'customer') {
+        document.getElementById('view-customer').classList.remove('hidden');
+        renderCustomerView();
+      } else if (role === 'owner') {
+        document.getElementById('view-owner').classList.remove('hidden');
+        startListeningToOrders();
+      }
+    };
+
+    window.goHome = () => {
+      document.getElementById('view-customer').classList.add('hidden');
+      document.getElementById('view-owner').classList.add('hidden');
+      document.getElementById('view-menu').classList.remove('hidden');
+      if (unsubscribeOrders) {
+        unsubscribeOrders();
+        unsubscribeOrders = null;
+      }
+      resetCart();
+      currentRole = null;
+    };
+
+    // --- 모달 제어 ---
+    function showModal(message, icon) {
+      document.getElementById('modal-message').innerText = message;
+      document.getElementById('modal-icon').innerText = icon;
+      document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+    window.closeModal = () => {
+      document.getElementById('modal-overlay').classList.add('hidden');
+    };
+
+    // --- 손님 (Customer) 로직 ---
+    function renderCustomerView() {
+      const grid = document.getElementById('flower-grid');
+      grid.innerHTML = '';
+      flowers.forEach(flower => {
+        const card = document.createElement('div');
+        card.className = `${flower.color} border-4 ${flower.border} rounded-3xl p-4 flex flex-col items-center shadow-sm relative`;
+        card.innerHTML = `
+          <div class="text-7xl mb-2">${flower.icon}</div>
+          <div class="text-2xl font-bold mb-4">${flower.name}</div>
+          <div class="flex items-center gap-4 bg-white rounded-2xl p-2 shadow-inner w-full justify-between">
+            <button onclick="updateCart('${flower.id}', -1)" class="btn-press bg-gray-200 text-gray-700 w-12 h-12 rounded-xl text-3xl font-bold leading-none">-</button>
+            <span id="count-${flower.id}" class="text-3xl font-bold w-8 text-center">${cart[flower.id]}</span>
+            <button onclick="updateCart('${flower.id}', 1)" class="btn-press bg-pink-400 text-white w-12 h-12 rounded-xl text-3xl font-bold leading-none">+</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      updateOrderButton();
+    }
+
+    window.updateCart = (flowerId, change) => {
+      initAudio();
+      const newCount = cart[flowerId] + change;
+      if (newCount >= 0 && newCount <= 20) { // 너무 많이 담지 못하게 제한
+        cart[flowerId] = newCount;
+        document.getElementById(`count-${flowerId}`).innerText = cart[flowerId];
+        updateOrderButton();
+      }
+    };
+
+    function updateOrderButton() {
+      const totalCount = Object.values(cart).reduce((a, b) => a + b, 0);
+      document.getElementById('total-count').innerText = totalCount;
+      
+      const btn = document.getElementById('btn-order');
+      if (totalCount > 0) {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400', 'border-gray-600');
+        btn.classList.add('bg-pink-500', 'border-pink-700');
+        btn.disabled = false;
+      } else {
+        btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400', 'border-gray-600');
+        btn.classList.remove('bg-pink-500', 'border-pink-700');
+        btn.disabled = true;
+      }
+    }
+
+    function resetCart() {
+      for (let key in cart) cart[key] = 0;
+      if (currentRole === 'customer') renderCustomerView();
+    }
+
+    window.submitOrder = async () => {
+      initAudio();
+      const totalCount = Object.values(cart).reduce((a, b) => a + b, 0);
+      if (totalCount === 0) return;
+
+      const btn = document.getElementById('btn-order');
+      btn.innerText = "주문 중...";
+      btn.disabled = true;
+
+      // 주문서 만들기
+      const orderItems = [];
+      flowers.forEach(f => {
+        if (cart[f.id] > 0) {
+          orderItems.push({ name: f.name, icon: f.icon, count: cart[f.id] });
+        }
+      });
+
+      try {
+        await addDoc(collection(db, ORDERS_COLLECTION), {
+          items: orderItems,
+          total: totalCount,
+          createdAt: serverTimestamp()
+        });
+        
+        playSound('success');
+        showModal('꽃 주문이 완료되었어요!\n사장님을 기다려주세요.', '🌸');
+        resetCart();
+      } catch (error) {
+        console.error("주문 오류:", error);
+        alert("앗! 주문에 실패했어요. 인터넷 연결을 확인해주세요.");
+      } finally {
+        btn.innerText = "주문하기 🛒";
+        updateOrderButton();
+      }
+    };
+
+    // --- 사장님 (Owner) 로직 ---
+    function startListeningToOrders() {
+      const q = collection(db, ORDERS_COLLECTION);
+      
+      unsubscribeOrders = onSnapshot(q, (snapshot) => {
+        const orders = [];
+        snapshot.forEach((doc) => {
+          orders.push({ id: doc.id, ...doc.data() });
+        });
+
+        // 클라이언트 측에서 시간순(오래된 순) 정렬 (복합 쿼리 인덱스 에러 방지)
+        orders.sort((a, b) => {
+          const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
+          const timeB = b.createdAt ? b.createdAt.toMillis() : Date.now();
+          return timeA - timeB;
+        });
+
+        renderOwnerView(orders);
+
+        // 새 주문이 들어왔을 때 알림
+        if (orders.length > previousOrderCount && previousOrderCount !== 0) {
+          playSound('notification');
+          document.body.classList.add('flash-bg');
+          setTimeout(() => document.body.classList.remove('flash-bg'), 3000);
+        }
+        previousOrderCount = orders.length;
+
+      }, (error) => {
+        console.error("실시간 주문 가져오기 에러:", error);
+      });
+    }
+
+    function renderOwnerView(orders) {
+      const listContainer = document.getElementById('order-list');
+      const emptyState = document.getElementById('empty-orders');
+      document.getElementById('order-count-badge').innerText = orders.length;
+
+      // 화면 초기화
+      Array.from(listContainer.children).forEach(child => {
+        if (child.id !== 'empty-orders') listContainer.removeChild(child);
+      });
+
+      if (orders.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        
+        orders.forEach((order, index) => {
+          const card = document.createElement('div');
+          card.className = "bg-white p-5 rounded-3xl shadow-md border-2 border-blue-200 flex flex-col sm:flex-row justify-between items-center gap-4 pop-in";
+          card.style.animationDelay = `${index * 0.1}s`;
+          
+          let itemsHtml = order.items.map(item => 
+            `<div class="flex items-center gap-2 bg-pink-50 px-4 py-2 rounded-xl text-2xl border border-pink-100">
+               <span>${item.icon}</span>
+               <span class="font-bold">${item.name} <span class="text-pink-600">${item.count}</span>개</span>
+             </div>`
+          ).join('');
+
+          card.innerHTML = `
+            <div class="flex-1 w-full">
+              <div class="text-blue-500 font-bold mb-3 flex items-center gap-2">
+                <span class="bg-blue-100 px-3 py-1 rounded-lg text-lg">주문 ${index + 1}</span>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                ${itemsHtml}
+              </div>
+            </div>
+            <button onclick="completeOrder('${order.id}')" class="btn-press shrink-0 bg-blue-500 text-white text-2xl py-6 px-8 rounded-2xl shadow-md border-b-8 border-blue-700 w-full sm:w-auto mt-4 sm:mt-0">
+              배달 완료 🚚
+            </button>
+          `;
+          listContainer.appendChild(card);
+        });
+      }
+    }
+
+    window.completeOrder = async (orderId) => {
+      initAudio();
+      try {
+        await deleteDoc(doc(db, ORDERS_COLLECTION, orderId));
+        // 삭제 성공 시 onSnapshot이 자동으로 화면을 갱신해줍니다.
+      } catch (error) {
+        console.error("배달 완료 처리 에러:", error);
+      }
+    };
+
+  </script>
+</body>
+</html>
+
+```
