@@ -13,7 +13,6 @@
       touch-action: manipulation;
       -webkit-user-select: none;
       user-select: none;
-      /* 크롬 주소창 등으로 인한 화면 스크롤과 출렁임 원천 차단 */
       overflow: hidden; 
     }
     .btn-press:active {
@@ -36,40 +35,44 @@
     
     <!-- 1. 시작 메뉴 화면 -->
     <div id="view-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-[#FFF0F5] z-50 p-6">
-      <h1 class="text-5xl sm:text-7xl md:text-8xl text-pink-500 mb-6 text-center drop-shadow-md font-black">🌸 유치원 꽃가게 🌸</h1>
-      <p class="text-xl sm:text-2xl md:text-3xl text-pink-400 mb-10 sm:mb-14 font-bold">역할을 골라주세요!</p>
+      <h1 class="text-5xl sm:text-7xl md:text-8xl text-pink-500 mb-6 text-center drop-shadow-md font-black whitespace-nowrap">🌸 유치원 꽃가게 🌸</h1>
+      <p class="text-xl sm:text-2xl md:text-3xl text-pink-400 mb-10 sm:mb-14 font-bold whitespace-nowrap">역할을 골라주세요!</p>
       <div class="flex flex-col sm:flex-row gap-6 sm:gap-10 w-full max-w-4xl justify-center px-6">
         <button onclick="startApp('customer')" class="btn-press flex-1 bg-pink-400 hover:bg-pink-500 text-white text-3xl sm:text-4xl md:text-5xl py-10 sm:py-16 px-8 rounded-[2.5rem] shadow-2xl border-b-8 border-pink-600 flex flex-col items-center justify-center gap-4 sm:gap-6 transition-all">
           <span class="text-7xl sm:text-8xl md:text-9xl">👧👦</span>
-          <span class="font-bold tracking-wide">손님용 키오스크</span>
+          <span class="font-bold tracking-wide whitespace-nowrap">손님용 키오스크</span>
         </button>
         <button onclick="startApp('owner')" class="btn-press flex-1 bg-blue-400 hover:bg-blue-500 text-white text-3xl sm:text-4xl md:text-5xl py-10 sm:py-16 px-8 rounded-[2.5rem] shadow-2xl border-b-8 border-blue-600 flex flex-col items-center justify-center gap-4 sm:gap-6 transition-all">
           <span class="text-7xl sm:text-8xl md:text-9xl">🏪</span>
-          <span class="font-bold tracking-wide">사장님용 화면</span>
+          <span class="font-bold tracking-wide whitespace-nowrap">사장님용 화면</span>
         </button>
       </div>
     </div>
 
     <!-- 2. 손님용 화면 -->
     <div id="view-customer" class="hidden absolute inset-0 flex flex-col bg-pink-50 z-40 h-[100dvh]">
-      <!-- 상단 헤더 -->
-      <div class="bg-pink-400 text-white text-2xl sm:text-4xl md:text-5xl font-bold py-3 sm:py-5 px-6 sm:px-8 text-center shadow-md flex justify-between items-center shrink-0">
-        <button onclick="goHome()" class="text-lg sm:text-2xl md:text-3xl bg-pink-500 py-2 sm:py-3 px-4 sm:px-6 rounded-2xl btn-press">🏠 처음으로</button>
-        <span class="tracking-wide">🌸 예쁜 꽃을 골라주세요 🌸</span>
-        <div class="w-24 sm:w-32"></div>
+      <!-- 상단 헤더 (그리드 정렬로 한 줄 고정 및 찌그러짐 원천 방지) -->
+      <div class="bg-pink-400 text-white py-4 px-6 sm:px-8 text-center shadow-md grid grid-cols-3 items-center shrink-0">
+        <div class="text-left">
+          <button onclick="goHome()" class="text-lg sm:text-2xl md:text-3xl bg-pink-500 py-2.5 px-5 rounded-2xl btn-press whitespace-nowrap">🏠 처음으로</button>
+        </div>
+        <div class="text-center font-bold text-xl sm:text-3xl md:text-4xl whitespace-nowrap">
+          🌸 예쁜 꽃을 골라주세요 🌸
+        </div>
+        <div class="text-right"></div>
       </div>
       
-      <!-- 꽃 상품 리스트 (가로/세로 자동 대처, 패딩을 줄여 안전성 확보) -->
-      <div id="flower-grid" class="flex-1 p-3 sm:p-5 grid grid-cols-1 landscape:grid-cols-3 gap-3 sm:gap-5 h-full min-h-0 overflow-hidden">
+      <!-- 꽃 상품 리스트 (텍스트와 이미지 크기를 1.5배 키워 시원하게 구성) -->
+      <div id="flower-grid" class="flex-1 p-4 sm:p-6 grid grid-cols-1 landscape:grid-cols-3 gap-4 sm:gap-6 h-full min-h-0 overflow-hidden">
         <!-- JS 렌더링 영역 -->
       </div>
 
-      <!-- 하단 주문바 (크롬 주소창과 시스템 네비게이션바를 배려한 적정 여백 적용) -->
+      <!-- 하단 주문바 -->
       <div class="bg-white py-3 sm:py-5 px-6 sm:px-12 shadow-[0_-6px_20px_rgba(0,0,0,0.15)] shrink-0 flex justify-between items-center rounded-t-[1.5rem] sm:rounded-t-[2.5rem] border-t-4 sm:border-t-8 border-pink-200 font-bold mb-0 pb-safe">
-        <div class="text-xl sm:text-3xl md:text-4xl text-pink-600">
+        <div class="text-xl sm:text-3xl md:text-4xl text-pink-600 whitespace-nowrap">
           내가 고른 수량: <span id="total-count" class="text-2xl sm:text-4xl md:text-5xl text-pink-500 font-extrabold">0</span> 개
         </div>
-        <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-xl sm:text-3xl md:text-4xl font-bold py-3 sm:py-5 px-6 sm:px-12 rounded-xl sm:rounded-2xl shadow-xl border-b-4 sm:border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all flex items-center gap-3">
+        <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-xl sm:text-3xl md:text-4xl font-bold py-3 sm:py-5 px-6 sm:px-12 rounded-xl sm:rounded-2xl shadow-xl border-b-4 sm:border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all flex items-center gap-3 whitespace-nowrap">
           <span>주문하기</span> <span>🛒</span>
         </button>
       </div>
@@ -78,18 +81,24 @@
     <!-- 3. 사장님용 화면 -->
     <div id="view-owner" class="hidden absolute inset-0 flex flex-col bg-blue-50 z-30 h-[100dvh]">
       <!-- 상단 헤더 -->
-      <div class="bg-blue-400 text-white text-2xl sm:text-4xl md:text-5xl font-bold py-3 sm:py-5 px-6 sm:px-8 text-center shadow-md flex justify-between items-center shrink-0">
-        <button onclick="goHome()" class="text-lg sm:text-2xl md:text-3xl bg-blue-500 py-2 sm:py-3 px-4 sm:px-6 rounded-2xl btn-press">🏠 처음으로</button>
-        <span class="tracking-wide font-bold">🏪 꽃가게 사장님 화면 🏪</span>
-        <div class="text-xl sm:text-2xl bg-blue-500 py-2 sm:py-3 px-4 sm:px-6 rounded-2xl font-bold">대기 주문: <span id="order-count-badge">0</span></div>
+      <div class="bg-blue-400 text-white py-4 px-6 sm:px-8 text-center shadow-md grid grid-cols-3 items-center shrink-0">
+        <div class="text-left">
+          <button onclick="goHome()" class="text-lg sm:text-2xl md:text-3xl bg-blue-500 py-2.5 px-5 rounded-2xl btn-press whitespace-nowrap">🏠 처음으로</button>
+        </div>
+        <div class="text-center font-bold text-xl sm:text-3xl md:text-4xl whitespace-nowrap">
+          🏪 꽃가게 사장님 화면 🏪
+        </div>
+        <div class="text-right font-bold text-lg sm:text-2xl md:text-3xl whitespace-nowrap">
+          대기 주문: <span id="order-count-badge" class="bg-blue-500 py-1.5 px-4 rounded-xl">0</span>
+        </div>
       </div>
 
       <!-- 주문 내역 리스트 -->
       <div id="order-list" class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 sm:gap-5">
         <div id="empty-orders" class="h-full flex flex-col items-center justify-center text-gray-400 text-3xl sm:text-4xl gap-4 sm:gap-6 my-auto font-bold">
           <span class="text-7xl sm:text-8xl">💤</span>
-          <span class="text-gray-500 text-2xl sm:text-3xl">아직 들어온 주문이 없어요!</span>
-          <span class="text-lg sm:text-xl text-gray-400">손님들이 주문을 준비하고 있어요.</span>
+          <span class="text-gray-500 text-2xl sm:text-3xl whitespace-nowrap">아직 들어온 주문이 없어요!</span>
+          <span class="text-lg sm:text-xl text-gray-400 whitespace-nowrap">손님들이 주문을 준비하고 있어요.</span>
         </div>
       </div>
     </div>
@@ -97,7 +106,7 @@
     <!-- 주문 성공 즉시 알림 토스트 -->
     <div id="toast-message" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-10 sm:px-16 py-6 sm:py-8 rounded-[2rem] text-3xl sm:text-4xl md:text-5xl shadow-2xl z-[100] font-bold pointer-events-none transition-all duration-300 flex flex-col items-center gap-3 sm:gap-4">
       <span class="text-6xl sm:text-7xl">🎉</span>
-      <span class="text-center">주문이 사장님께 날아갔어요!</span>
+      <span class="text-center whitespace-nowrap">주문이 사장님께 날아갔어요!</span>
     </div>
 
   </div>
@@ -106,7 +115,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-    // 선생님의 Firebase 설정 정보
     const firebaseConfig = {
       apiKey: "AIzaSyCXqCCi3tWHmL6OKC4SIkqYsJA1-0Sal4w",
       authDomain: "flower-d52f7.firebaseapp.com",
@@ -118,7 +126,6 @@
       databaseURL: "https://flower-d52f7-default-rtdb.firebaseio.com" 
     };
 
-    // Firebase 초기화
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const DB_ORDERS_PATH = "kindergarten_flower_orders";
@@ -146,7 +153,6 @@
       }
     }
 
-    // 터치 입력 즉시 음소거 해제
     window.addEventListener('touchstart', initAudio, { passive: true });
     window.addEventListener('click', initAudio, { passive: true });
     window.addEventListener('pointerdown', initAudio, { passive: true });
@@ -230,15 +236,17 @@
       grid.innerHTML = '';
       flowers.forEach(flower => {
         const card = document.createElement('div');
-        // 크롬 브라우저에서 상단 탭 때문에 세로가 눌릴 것을 대비해 p-3 등 카드 내부 여백을 컴팩트하게 조정
-        card.className = `${flower.color} border-4 ${flower.border} rounded-[2rem] p-3 sm:p-4 flex flex-row landscape:flex-col justify-between items-center shadow-md h-full w-full min-h-0`;
+        // 가로/세로 화면에 맞추어 유동적으로 큼직한 비율로 유지
+        card.className = `${flower.color} border-4 ${flower.border} rounded-[2.5rem] p-4 sm:p-6 flex flex-row landscape:flex-col justify-around items-center shadow-lg h-full w-full min-h-0`;
         card.innerHTML = `
-          <div class="text-6xl sm:text-7xl landscape:text-[7.5rem] landscape:md:text-[8.5rem] leading-none select-none flex-shrink-0">${flower.icon}</div>
-          <div class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-800">${flower.name}</div>
-          <div class="flex items-center gap-2 sm:gap-4 bg-white rounded-2xl p-2 shadow-inner w-auto sm:w-full max-w-xs justify-between flex-shrink-0">
-            <button onclick="updateCart('${flower.id}', -1)" class="btn-press bg-gray-200 text-gray-700 w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl text-xl sm:text-3xl font-extrabold flex items-center justify-center">-</button>
-            <span id="count-${flower.id}" class="text-xl sm:text-3xl md:text-4xl font-extrabold w-10 sm:w-14 text-center text-gray-800">0</span>
-            <button onclick="updateCart('${flower.id}', 1)" class="btn-press bg-pink-400 text-white w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl text-xl sm:text-3xl font-extrabold flex items-center justify-center">+</button>
+          <!-- 이모지 크기를 기존 대비 1.5배 확대하여 더 시원하고 또렷하게 출력 -->
+          <div class="text-7xl sm:text-8xl landscape:text-[9rem] landscape:md:text-[11.5rem] leading-none select-none flex-shrink-0">${flower.icon}</div>
+          <!-- 글씨 크기 확대 (text-3xl sm:text-4xl md:text-5xl) -->
+          <div class="text-3xl sm:text-4xl md:text-5xl font-black text-gray-800 whitespace-nowrap">${flower.name}</div>
+          <div class="flex items-center gap-3 sm:gap-6 bg-white rounded-2xl p-2.5 sm:p-3 shadow-inner w-auto sm:w-full max-w-xs justify-between flex-shrink-0">
+            <button onclick="updateCart('${flower.id}', -1)" class="btn-press bg-gray-200 text-gray-700 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center">-</button>
+            <span id="count-${flower.id}" class="text-2xl sm:text-4xl md:text-5xl font-extrabold w-12 sm:w-16 text-center text-gray-800">0</span>
+            <button onclick="updateCart('${flower.id}', 1)" class="btn-press bg-pink-400 text-white w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center">+</button>
           </div>
         `;
         grid.appendChild(card);
@@ -246,7 +254,6 @@
       updateOrderButton();
     }
 
-    // 회전 센서나 창 크기 바뀔 때 화면을 예쁘게 자동 재정렬
     window.addEventListener('resize', () => {
       if (currentRole === 'customer') {
         renderCustomerView();
@@ -297,11 +304,9 @@
         }
       });
 
-      // 누르자마자 딜레이 없이 수량 즉시 0으로 완전히 대기 리셋
       resetCart();
       updateOrderButton();
 
-      // 소리와 배송 완료 알림 팝업 즉시 실행
       playSound('success');
       const toast = document.getElementById('toast-message');
       toast.classList.remove('hidden');
@@ -309,7 +314,6 @@
         toast.classList.add('hidden');
       }, 1800);
 
-      // Realtime Database로 주문 푸시 전송
       try {
         const dbRef = ref(db, DB_ORDERS_PATH);
         await push(dbRef, {
@@ -377,22 +381,22 @@
           card.style.animationDelay = `${index * 0.1}s`;
           
           let itemsHtml = order.items.map(item => 
-            `<div class="flex items-center gap-3 bg-pink-50 px-4 py-2 rounded-2xl text-xl sm:text-2xl border border-pink-100">
-               <span class="text-2xl sm:text-3xl">${item.icon}</span>
-               <span class="font-bold text-gray-700">${item.name} <span class="text-pink-600 font-extrabold text-2xl sm:text-3xl">${item.count}</span>개</span>
+            `<div class="flex items-center gap-3 bg-pink-50 px-5 py-3 rounded-2xl text-2xl sm:text-3xl border border-pink-100 whitespace-nowrap">
+               <span class="text-3xl sm:text-4xl">${item.icon}</span>
+               <span class="font-bold text-gray-700">${item.name} <span class="text-pink-600 font-extrabold text-3xl sm:text-4xl">${item.count}</span>개</span>
              </div>`
           ).join('');
 
           card.innerHTML = `
             <div class="flex-1 w-full">
               <div class="text-blue-500 font-bold mb-2 sm:mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 px-3 py-1.5 rounded-xl text-lg sm:text-xl font-black">주문 번호 ${index + 1}</span>
+                <span class="bg-blue-100 px-3 py-1.5 rounded-xl text-lg sm:text-xl font-black whitespace-nowrap">주문 번호 ${index + 1}</span>
               </div>
               <div class="flex flex-wrap gap-2 sm:gap-3 font-bold">
                 ${itemsHtml}
               </div>
             </div>
-            <button onclick="completeOrder('${order.id}')" class="btn-press shrink-0 bg-blue-500 hover:bg-blue-600 text-white text-xl sm:text-2xl md:text-3xl font-bold py-4 sm:py-6 px-8 sm:px-10 rounded-[1.5rem] shadow-xl border-b-8 border-blue-700 w-full md:w-auto transition-all">
+            <button onclick="completeOrder('${order.id}')" class="btn-press shrink-0 bg-blue-500 hover:bg-blue-600 text-white text-xl sm:text-2xl md:text-3xl font-bold py-4 sm:py-6 px-8 sm:px-10 rounded-[1.5rem] shadow-xl border-b-8 border-blue-700 w-full md:w-auto transition-all whitespace-nowrap">
               배달 완료 🚚
             </button>
           `;
