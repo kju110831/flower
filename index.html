@@ -30,7 +30,6 @@
 </head>
 <body class="text-gray-800 h-[100dvh] w-screen overflow-hidden bg-[#FFF5F5] p-0 m-0 flex justify-center items-center">
 
-  <!-- 전체 화면 컨테이너 (h-[100dvh]를 사용하여 주소창과 네비바를 제외한 실제 화면에 100% 밀착시킴) -->
   <div id="app-container" class="w-full h-[100dvh] relative overflow-hidden flex flex-col p-0 m-0">
     
     <!-- 1. 시작 메뉴 화면 -->
@@ -51,7 +50,7 @@
 
     <!-- 2. 손님용 화면 -->
     <div id="view-customer" class="hidden absolute inset-0 flex flex-col bg-pink-50 z-40 h-[100dvh]">
-      <!-- 상단 헤더 (그리드 정렬로 한 줄 고정 및 찌그러짐 원천 방지) -->
+      <!-- 상단 헤더 -->
       <div class="bg-pink-400 text-white py-4 px-6 sm:px-8 text-center shadow-md grid grid-cols-3 items-center shrink-0">
         <div class="text-left">
           <button onclick="goHome()" class="text-lg sm:text-2xl md:text-3xl bg-pink-500 py-2.5 px-5 rounded-2xl btn-press whitespace-nowrap">🏠 처음으로</button>
@@ -62,7 +61,7 @@
         <div class="text-right"></div>
       </div>
       
-      <!-- 꽃 상품 리스트 (텍스트와 이미지 크기를 1.5배 키워 시원하게 구성) -->
+      <!-- 꽃 상품 리스트 -->
       <div id="flower-grid" class="flex-1 p-4 sm:p-6 grid grid-cols-1 landscape:grid-cols-3 gap-4 sm:gap-6 h-full min-h-0 overflow-hidden">
         <!-- JS 렌더링 영역 -->
       </div>
@@ -72,7 +71,7 @@
         <div class="text-xl sm:text-3xl md:text-4xl text-pink-600 whitespace-nowrap">
           내가 고른 수량: <span id="total-count" class="text-2xl sm:text-4xl md:text-5xl text-pink-500 font-extrabold">0</span> 개
         </div>
-        <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-xl sm:text-3xl md:text-4xl font-bold py-3 sm:py-5 px-6 sm:px-12 rounded-xl sm:rounded-2xl shadow-xl border-b-4 sm:border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all flex items-center gap-3 whitespace-nowrap">
+        <button id="btn-order" onclick="submitOrder()" class="btn-press bg-pink-500 text-white text-xl sm:text-3xl md:text-4xl font-bold py-3 sm:py-5 px-6 sm:px-12 rounded-xl sm:rounded-2xl shadow-xl border-b-4 sm:border-b-8 border-pink-700 opacity-50 cursor-not-allowed transition-all flex items-center gap-3 whitespace-nowrap" disabled>
           <span>주문하기</span> <span>🛒</span>
         </button>
       </div>
@@ -140,6 +139,7 @@
     let currentRole = null;
     let previousOrderCount = 0;
     let rtdbListener = null;
+    let isInitialLoad = true; // 추가: 첫 로드 시점인지 구별하는 변수
 
     // --- 웹 오디오 설정 ---
     let audioCtx = null;
@@ -150,6 +150,12 @@
       }
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
+      }
+      // 태블릿 브라우저 자동재생 잠금 우회를 위해 사전에 무음 음성을 가볍게 실행시킵니다.
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
       }
     }
 
@@ -179,15 +185,6 @@
         gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
         osc.start(now);
         osc.stop(now + 0.6);
-      } else if (type === 'notification') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(880.00, now);
-        osc.frequency.setValueAtTime(698.46, now + 0.12);
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(0.7, now + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
-        osc.start(now);
-        osc.stop(now + 0.8);
       } else if (type === 'pop') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(450, now);
@@ -198,7 +195,6 @@
         osc.stop(now + 0.06);
       }
     }
-
     // --- 앱 상태 제어 ---
     window.startApp = (role) => {
       initAudio();
@@ -213,6 +209,7 @@
       } else if (role === 'owner') {
         document.getElementById('view-owner').classList.remove('hidden');
         document.getElementById('view-customer').classList.add('hidden');
+        isInitialLoad = true; // 사장님 화면에 들어올 때마다 초기화
         startListeningToOrders();
       }
     };
@@ -235,6 +232,12 @@
       const grid = document.getElementById('flower-grid');
       grid.innerHTML = '';
       flowers.forEach(flower => {
+        const currentCount = cart[flower.id];
+        const isMax = currentCount >= 3;
+        const plusBtnClass = isMax 
+          ? "bg-gray-300 text-gray-500 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center cursor-not-allowed opacity-50 transition-colors"
+          : "btn-press bg-pink-400 text-white w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center transition-colors";
+
         const card = document.createElement('div');
         // 가로/세로 화면에 맞추어 유동적으로 큼직한 비율로 유지
         card.className = `${flower.color} border-4 ${flower.border} rounded-[2.5rem] p-4 sm:p-6 flex flex-row landscape:flex-col justify-around items-center shadow-lg h-full w-full min-h-0`;
@@ -245,8 +248,8 @@
           <div class="text-3xl sm:text-4xl md:text-5xl font-black text-gray-800 whitespace-nowrap">${flower.name}</div>
           <div class="flex items-center gap-3 sm:gap-6 bg-white rounded-2xl p-2.5 sm:p-3 shadow-inner w-auto sm:w-full max-w-xs justify-between flex-shrink-0">
             <button onclick="updateCart('${flower.id}', -1)" class="btn-press bg-gray-200 text-gray-700 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center">-</button>
-            <span id="count-${flower.id}" class="text-2xl sm:text-4xl md:text-5xl font-extrabold w-12 sm:w-16 text-center text-gray-800">0</span>
-            <button onclick="updateCart('${flower.id}', 1)" class="btn-press bg-pink-400 text-white w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center">+</button>
+            <span id="count-${flower.id}" class="text-2xl sm:text-4xl md:text-5xl font-extrabold w-12 sm:w-16 text-center text-gray-800">${currentCount}</span>
+            <button id="btn-plus-${flower.id}" onclick="updateCart('${flower.id}', 1)" ${isMax ? 'disabled' : ''} class="${plusBtnClass}">+</button>
           </div>
         `;
         grid.appendChild(card);
@@ -263,9 +266,22 @@
     window.updateCart = (flowerId, change) => {
       playSound('pop');
       const newCount = cart[flowerId] + change;
+      
+      // 최소 0개에서 최대 3개까지만 제한
       if (newCount >= 0 && newCount <= 3) {
         cart[flowerId] = newCount;
         document.getElementById(`count-${flowerId}`).innerText = cart[flowerId];
+        
+        // 플러스(+) 버튼 UI 실시간 갱신
+        const plusBtn = document.getElementById(`btn-plus-${flowerId}`);
+        if (newCount >= 3) {
+          plusBtn.disabled = true;
+          plusBtn.className = "bg-gray-300 text-gray-500 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center cursor-not-allowed opacity-50 transition-colors";
+        } else {
+          plusBtn.disabled = false;
+          plusBtn.className = "btn-press bg-pink-400 text-white w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center transition-colors";
+        }
+        
         updateOrderButton();
       }
     };
@@ -348,14 +364,15 @@
 
         renderOwnerView(orders);
 
-        if (orders.length > previousOrderCount) {
-          if (previousOrderCount !== 0) {
-            playSound('notification');
-            document.body.classList.add('flash-bg');
-            setTimeout(() => document.body.classList.remove('flash-bg'), 2400);
-          }
+        // 첫 페이지 로드(isInitialLoad)가 끝난 후 새 주문이 들어왔을 때만 소리 재생
+        if (!isInitialLoad && orders.length > previousOrderCount) {
+          playSound('notification');
+          document.body.classList.add('flash-bg');
+          setTimeout(() => document.body.classList.remove('flash-bg'), 2400);
         }
+        
         previousOrderCount = orders.length;
+        isInitialLoad = false; // 첫 데이터 조회가 끝났으므로 false로 변경
       }, (error) => {
         console.error("실시간 수신 오류:", error);
       });
