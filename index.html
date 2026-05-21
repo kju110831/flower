@@ -30,6 +30,7 @@
 </head>
 <body class="text-gray-800 h-[100dvh] w-screen overflow-hidden bg-[#FFF5F5] p-0 m-0 flex justify-center items-center">
 
+  <!-- 전체 화면 컨테이너 (h-[100dvh]를 사용하여 주소창과 네비바를 제외한 실제 화면에 100% 밀착시킴) -->
   <div id="app-container" class="w-full h-[100dvh] relative overflow-hidden flex flex-col p-0 m-0">
     
     <!-- 1. 시작 메뉴 화면 -->
@@ -50,7 +51,7 @@
 
     <!-- 2. 손님용 화면 -->
     <div id="view-customer" class="hidden absolute inset-0 flex flex-col bg-pink-50 z-40 h-[100dvh]">
-      <!-- 상단 헤더 -->
+      <!-- 상단 헤더 (그리드 정렬로 한 줄 고정 및 찌그러짐 원천 방지) -->
       <div class="bg-pink-400 text-white py-4 px-6 sm:px-8 text-center shadow-md grid grid-cols-3 items-center shrink-0">
         <div class="text-left">
           <button onclick="goHome()" class="text-lg sm:text-2xl md:text-3xl bg-pink-500 py-2.5 px-5 rounded-2xl btn-press whitespace-nowrap">🏠 처음으로</button>
@@ -61,7 +62,7 @@
         <div class="text-right"></div>
       </div>
       
-      <!-- 꽃 상품 리스트 -->
+      <!-- 꽃 상품 리스트 (텍스트와 이미지 크기를 1.5배 키워 시원하게 구성) -->
       <div id="flower-grid" class="flex-1 p-4 sm:p-6 grid grid-cols-1 landscape:grid-cols-3 gap-4 sm:gap-6 h-full min-h-0 overflow-hidden">
         <!-- JS 렌더링 영역 -->
       </div>
@@ -139,7 +140,7 @@
     let currentRole = null;
     let previousOrderCount = 0;
     let rtdbListener = null;
-    let isInitialLoad = true; // 추가: 첫 로드 시점인지 구별하는 변수
+    let isInitialLoad = true; // 첫 로드 시점인지 구별하는 변수
 
     // --- 웹 오디오 설정 ---
     let audioCtx = null;
@@ -185,6 +186,18 @@
         gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
         osc.start(now);
         osc.stop(now + 0.6);
+      } else if (type === 'notification') {
+        // 복구: 새 주문 수신 알림음 (띠로롱~)
+        osc.type = 'sine';
+        const notes = [783.99, 1046.50]; // G5, C6 2톤 벨소리
+        notes.forEach((freq, index) => {
+          osc.frequency.setValueAtTime(freq, now + index * 0.15);
+        });
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.5, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
       } else if (type === 'pop') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(450, now);
