@@ -263,7 +263,7 @@
     window.updateCart = (flowerId, change) => {
       playSound('pop');
       const newCount = cart[flowerId] + change;
-      if (newCount >= 0 && newCount <= 20) {
+      if (newCount >= 0 && newCount <= 3) {
         cart[flowerId] = newCount;
         document.getElementById(`count-${flowerId}`).innerText = cart[flowerId];
         updateOrderButton();
