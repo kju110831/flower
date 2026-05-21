@@ -365,11 +365,11 @@
         renderOwnerView(orders);
 
         // 첫 페이지 로드(isInitialLoad)가 끝난 후 새 주문이 들어왔을 때만 소리 재생
-        if (orders.length > previousOrderCount) {
-  playSound('notification');
-  document.body.classList.add('flash-bg');
-  setTimeout(() => document.body.classList.remove('flash-bg'), 2400);
-}
+        if (!isInitialLoad && orders.length > previousOrderCount) {
+          playSound('notification');
+          document.body.classList.add('flash-bg');
+          setTimeout(() => document.body.classList.remove('flash-bg'), 2400);
+        }
         
         previousOrderCount = orders.length;
         isInitialLoad = false; // 첫 데이터 조회가 끝났으므로 false로 변경
